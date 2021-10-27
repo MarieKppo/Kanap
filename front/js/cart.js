@@ -188,7 +188,112 @@ function totalPce() {
 }
 
 /******************************* vérifier les infos dans le formulaire de commande + requet post api */
-// fonction pour collecter tous les id des produits dans le panier
+/* ajouter condition si panier == vide alors ne pas afficher le formulaire */
+if (cart === null || cart == 0) {
+    // cacher le formulaire 
+    document.querySelector(".cart__order").style.display = "none";
+} else {
+    // récup le bouton commander pour écouter le click
+    let orderBtn = document.querySelector('#order');
+    // event listerner : au click si vérif ok alors envoyer contact + products à api (post)
+    orderBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        let contact = {};
+        let products = [];
+
+        //collecter les id des produits du panier
+        cart.forEach(element => {
+            products.push(element.ref);
+        })
+
+        //vérification des données du formulaire 
+        let firstName = document.querySelector('#firstName');
+        let lastName = document.querySelector('#lastName');
+        let address = document.querySelector('#address');
+        let city = document.querySelector('#city');
+        let email = document.querySelector('#email');
+        // prénom
+        if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
+            let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
+            firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> pour valider votre commande."
+            console.log("dans if prénom, car " + firstName.value + " ne correspond pas au modèle");
+        }
+        // nom
+        else if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(lastName.value)) {
+            let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
+            lastNameErrorMsg.innerHTML = "Renseignez votre nom pour valider votre commande."
+            console.log("dans if nom, car nom ne correspond pas au modèle");
+        }
+        // adresse
+        else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {
+            let addressErrorMsg = document.querySelector('#addressErrorMsg');
+            addressErrorMsg.innerHTML = "Renseignez votre address pour valider votre commande."
+            console.log("dans if adresse, car adresse ne correspond pas au modèle");
+        }
+        // ville
+        else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
+            let cityErrorMsg = document.querySelector('#cityErrorMsg');
+            cityErrorMsg.innerHTML = "Renseignez votre ville pour valider votre commande."
+            console.log("dans if ville, car ville est ne correspond pas au modèle");
+        }
+        // email
+        else if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value)) {
+            let emailErrorMsg = document.querySelector('#emailErrorMsg');
+            emailErrorMsg.innerHTML = "Renseignezvotre email pour valider votre commande."
+            console.log("dans if email, car email correspond pas au regex");
+        } else {
+            // récup valeurs et créer un objet contact 
+            contact = {
+                'firstName': firstName.value,
+                'lastName': lastName.value,
+                'address': address.value,
+                'city': city.value,
+                'email': email.value,
+            }
+        }
+
+        // console.log('le tableau des id des produits :' + products);
+        // console.log('les données contact sont : ');
+        // console.log(contact);
+        let order = {
+            contact,
+            products
+        }
+        console.log(order);
+
+        //requete post api
+        fetch("http://localhost:3000/api/products/order", {
+                "method": "post",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": JSON.stringify(order)
+            })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+            })
+            .then(function (value) {
+                localStorage.setItem('order', JSON.stringify(value));
+                //redirection vers page confirmation + 
+                window.location.href = "confirmation.html"    
+            })
+            .catch(err => {
+                console.error(err);
+            });
+        
+        //redirection vers page confirmation
+        // window.location.href = "confirmation.html"   
+
+    }); // fin eventListener
+}
+
+
+
+//trash saved au cas ou
+/* fonction pour collecter tous les id des produits dans le panier
 // function allProductsId() {
 //     let arrayProductsId = [];
 //     cart.forEach(element => {
@@ -199,12 +304,13 @@ function totalPce() {
 //     return arrayProductsId;
 //     })
 // }
+*/
 /* contrôle que les infos saisies dans le formulaire correspondent aux types de données attendues + requete post api : 
  * logique : si prénom != regex lettres alors afficher span "veuillez renseigner votre prénom" etc
  * si mail != regex mail ...
  * si cp != regex cp ...
  * else récup les données dans l'objet contact et les envoyer pour générer id commande
- */
+
 function validateForm() {
     let firstName   = document.querySelector('#firstName');
     let lastName    = document.querySelector('#lastName');
@@ -251,32 +357,8 @@ function validateForm() {
             'city'      : city.value, 
             'email'     : email.value,
         }
-        console.log("afficher le contact dans else");
-        console.log(contact);
-
-        console.log('id des produits :' + arrayProductsId);
-
-         
+        // console.log("afficher le contact dans else");
+        // console.log(contact);         
     }
 }
-
-// fonction qui permet d'envoyer les infos de contact à l'api // fetch
-
-// récup le bouton commander pour écouter le click
-let orderBtn = document.querySelector('#order');
-// ajouter event listerner et au click lancer la fonction si vérif ok alors envoyer objet au localstorage puis api (post)
-orderBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    let arrayProductsId = [];
-    cart.forEach(element => {
-        arrayProductsId.push(element.ref);
-    })
-    console.log('le tableau des id des produits :' + arrayProductsId);
-
-    validateForm();
-});
-
-
-//PAGE CONFIRMATION 
-//afficher l'id de la commande
+*/
