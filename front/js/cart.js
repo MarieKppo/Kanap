@@ -91,7 +91,7 @@ async function displayItem() {
                 });
         }
 
-        totalInCart();
+        // totalInCart();
         deleteProduct();
         changePdtQty();
         totalPce();
@@ -100,7 +100,7 @@ async function displayItem() {
 }
 displayItem();
 
-/* modifier la quantité de l'article 
+/* fonction pour modifier la quantité de l'article 
  * = 1 récup les input itemQuantity des articles et leur id dans le panier / 2 récup qté dans l'input itemQuantity
  * si itemQuantity change (addEventlistener) / alors set nouvelle quantité de itemQuantity ds DOM et dans cart
  */
@@ -113,14 +113,14 @@ function changePdtQty() { //chercher autres techniques pour retirer l'event list
             // console.log('index produit ' + k + ' valeur initiale ds la localStorage : ' + cart[k].quantity + ' nouvelle valeur : ' + itemQuantity[k].value);
             cart[k].quantity = itemQuantity[k].value;
             localStorage.setItem('cart', JSON.stringify(cart));
-            totalInCart();
+            // totalInCart();
             // ajouter fonction prix total pour recalcul à chaque retrait d'article
             totalPce();
         })
     }
 }
 
-/* Supprimer l'article : 
+/* fonction pour supprimer l'article : 
  * = 1 récup articles et leur id dans le cart 
  * si deleteItem click (addeventlistener) / alors set suppr product ds DOM et dans cart
  */
@@ -142,15 +142,16 @@ function deleteProduct() {
     }
 }
 
-// fonction pour calculer le nombre d'articles dans le panier
-function totalInCart() {
-    //logique : pour chaque élément du panier, ajouter sa quantité à la variable totalQuantity
-    let totalQty = Number(0);
-    cart.forEach(element => {
-        totalQty += Number(element.quantity);
-    });
-    document.querySelector('#totalQuantity').innerText = totalQty;
-}
+/* fonction pour calculer le nombre d'articles dans le panier
+// function totalInCart() {
+//     //logique : pour chaque élément du panier, ajouter sa quantité à la variable totalQuantity
+//     let totalQty = Number(0);
+//     cart.forEach(element => {
+//         totalQty += Number(element.quantity);
+//     });
+//     document.querySelector('#totalQuantity').innerText = totalQty;
+* }
+*/
 
 /* fonction pour calculer le montant total du panier 
  * 1 = calculer le prix d'un article * sa quantité
@@ -158,13 +159,16 @@ function totalInCart() {
  */
 function totalPce() {
     let totalPce = parseInt(0);
+    let totalQty = Number(0);
     // console.log('test')
 
     let elements = document.querySelectorAll('.cart__item');
     elements.forEach(element => {
         let dataAttribute = element.getAttribute('data-id');
         let productQty = element.querySelector(".itemQuantity").value;
-        // console.log(productQty + " " + dataAttribute);
+
+        totalQty += Number(productQty);
+        document.querySelector('#totalQuantity').innerText = totalQty;
 
         fetch("http://localhost:3000/api/products/" + dataAttribute)
             .then(function (res) {
@@ -183,8 +187,19 @@ function totalPce() {
     });
 }
 
-/******************************* vérifier les infos dans le formulaire de commande */
-/* contrôle que les infos saisies dans le formulaire correspondent aux types de données attendues : 
+/******************************* vérifier les infos dans le formulaire de commande + requet post api */
+// fonction pour collecter tous les id des produits dans le panier
+// function allProductsId() {
+//     let arrayProductsId = [];
+//     cart.forEach(element => {
+//         arrayProductsId.push(element.ref);
+//     // })
+//     // console.log('le tableau des id des produits :')
+//     // console.log(arrayProductsId);
+//     return arrayProductsId;
+//     })
+// }
+/* contrôle que les infos saisies dans le formulaire correspondent aux types de données attendues + requete post api : 
  * logique : si prénom != regex lettres alors afficher span "veuillez renseigner votre prénom" etc
  * si mail != regex mail ...
  * si cp != regex cp ...
@@ -197,7 +212,7 @@ function validateForm() {
     let city        = document.querySelector('#city');
     let email       = document.querySelector('#email'); 
     // prénom
-    if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(firstName.value)) {
+    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
         let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
         firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> pour valider votre commande."
         console.log("dans if prénom, car " + firstName.value + " ne correspond pas au modèle");
@@ -209,13 +224,13 @@ function validateForm() {
         console.log("dans if nom, car nom ne correspond pas au modèle");
     }
     // adresse
-    else if (!/[a-zA-Z0-9 \-']/gi.test(address.value)) {    
+    else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {    
         let addressErrorMsg = document.querySelector('#addressErrorMsg');
         addressErrorMsg.innerHTML = "Renseignez votre address pour valider votre commande."
         console.log("dans if adresse, car adresse ne correspond pas au modèle");
     }
     // ville
-    else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) {
+    else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
         let cityErrorMsg = document.querySelector('#cityErrorMsg');
         cityErrorMsg.innerHTML = "Renseignez votre ville pour valider votre commande."
         console.log("dans if ville, car ville est ne correspond pas au modèle");
@@ -228,7 +243,6 @@ function validateForm() {
     } 
     else {
         // récup valeurs et créer un objet contact 
-        console.log("dans else")
         // insérer la fonction qui permet d'envoyer les infos de contact à l'api + tester api avant envoie !!!
         let contact = {
             'firstName' : firstName.value,
@@ -239,7 +253,10 @@ function validateForm() {
         }
         console.log("afficher le contact dans else");
         console.log(contact);
-        // return contact; 
+
+        console.log('id des produits :' + arrayProductsId);
+
+         
     }
 }
 
@@ -250,11 +267,16 @@ let orderBtn = document.querySelector('#order');
 // ajouter event listerner et au click lancer la fonction si vérif ok alors envoyer objet au localstorage puis api (post)
 orderBtn.addEventListener('click', (e) => {
     e.preventDefault();
+
+    let arrayProductsId = [];
+    cart.forEach(element => {
+        arrayProductsId.push(element.ref);
+    })
+    console.log('le tableau des id des produits :' + arrayProductsId);
+
     validateForm();
+});
 
-})
-
-//générer un id de commande ? = comment ?
 
 //PAGE CONFIRMATION 
 //afficher l'id de la commande
