@@ -251,6 +251,8 @@ if (cart === null || cart == 0) {
                 'city': city.value,
                 'email': email.value,
             }
+            console.log('contact')
+            console.log(contact)
         }
 
         // console.log('le tableau des id des produits :' + products);
@@ -283,10 +285,6 @@ if (cart === null || cart == 0) {
             .catch(err => {
                 console.error(err);
             });
-        
-        //redirection vers page confirmation
-        // window.location.href = "confirmation.html"   
-
     }); // fin eventListener
 }
 
