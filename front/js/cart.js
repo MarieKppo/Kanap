@@ -3,9 +3,11 @@ const cart = JSON.parse(localStorage.getItem("cart"));
 
 async function displayItem() {
     if (cart === null || cart == 0) {
+        // ajout d'une div "panier vide"
         document.querySelector("#cart__items").innerHTML = "<div class=\"cart_item\">Votre panier est vide !</div>";
+        // masquer le formulaire de commande
+        document.querySelector(".cart__order").style.display = "none";
     } else {
-
         for (let i = 0; i < cart.length; i++) {
             const product = cart[i];
             let idKanap = product.ref;
@@ -91,7 +93,7 @@ async function displayItem() {
                 });
         }
 
-        // totalInCart();
+        // totalInCart(); fonction greffée à totalPce
         deleteProduct();
         changePdtQty();
         totalPce();
@@ -189,10 +191,10 @@ function totalPce() {
 
 /******************************* vérifier les infos dans le formulaire de commande + requet post api */
 /* ajouter condition si panier == vide alors ne pas afficher le formulaire */
-if (cart === null || cart == 0) {
-    // cacher le formulaire 
-    document.querySelector(".cart__order").style.display = "none";
-} else {
+// if (cart === null || cart == 0) {
+//     // cacher le formulaire 
+//     // document.querySelector(".cart__order").style.display = "none";
+// } else {
     // récup le bouton commander pour écouter le click
     let orderBtn = document.querySelector('#order');
     // event listerner : au click si vérif ok alors envoyer contact + products à api (post)
@@ -251,11 +253,10 @@ if (cart === null || cart == 0) {
                 'city': city.value,
                 'email': email.value,
             }
-            console.log('contact')
-            console.log(contact)
-        }
-
-        // console.log('le tableau des id des produits :' + products);
+            // console.log('contact')
+            // console.log(contact)
+            
+            // console.log('le tableau des id des produits :' + products);
         // console.log('les données contact sont : ');
         // console.log(contact);
         let order = {
@@ -285,8 +286,10 @@ if (cart === null || cart == 0) {
             .catch(err => {
                 console.error(err);
             });
+        }
+        //avec requete post hors else : requete envoyée meme si contact = vide
     }); // fin eventListener
-}
+// }
 
 
 
