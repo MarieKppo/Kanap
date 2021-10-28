@@ -1,6 +1,6 @@
 //PAGE PANIER
 const cart = JSON.parse(localStorage.getItem("cart"));
-
+// afficher le contenu du panier 
 async function displayItem() {
     if (cart === null || cart == 0) {
         // ajout d'une div "panier vide"
@@ -25,6 +25,7 @@ async function displayItem() {
                     let productName = value.name;
                     let imageUrl = value.imageUrl;
                     let altTxt = value.altTxt;
+
                     // créer les éléments dans lesquels les infos des produits vont ê affichés :
                     let cartSection = document.querySelector('#cart__items');
                     let article = document.createElement('article');
@@ -86,23 +87,19 @@ async function displayItem() {
                     article.appendChild(divImage);
                     article.appendChild(divContent);
                     cartSection.appendChild(article);
-
                 })
                 .catch(function (error) {
                     console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
                 });
         }
-
-        // totalInCart(); fonction greffée à totalPce
         deleteProduct();
         changePdtQty();
         totalPce();
-
     };
 }
 displayItem();
 
-/* fonction pour modifier la quantité de l'article 
+/* Modifier la quantité de l'article 
  * = 1 récup les input itemQuantity des articles et leur id dans le panier / 2 récup qté dans l'input itemQuantity
  * si itemQuantity change (addEventlistener) / alors set nouvelle quantité de itemQuantity ds DOM et dans cart
  */
@@ -122,7 +119,7 @@ function changePdtQty() { //chercher autres techniques pour retirer l'event list
     }
 }
 
-/* fonction pour supprimer l'article : 
+/* Supprimer l'article : 
  * = 1 récup articles et leur id dans le cart 
  * si deleteItem click (addeventlistener) / alors set suppr product ds DOM et dans cart
  */
@@ -140,6 +137,7 @@ function deleteProduct() {
             // recharger la page pour suppr affichage du produit dans le panier
             location.reload();
         })
+        //recalculer le prix total sans cet article
         totalPce();
     }
 }
@@ -155,8 +153,9 @@ function deleteProduct() {
 * }
 */
 
-/* fonction pour calculer le montant total du panier 
+/* fonction pour calculer le montant et la qté total du panier 
  * 1 = calculer le prix d'un article * sa quantité
+ * 1bis = calculer le nombre d'article total dans le panier
  * 2 = additionner les totaux de chaque ligne dans le prix total
  */
 function totalPce() {
@@ -190,75 +189,71 @@ function totalPce() {
 }
 
 /******************************* vérifier les infos dans le formulaire de commande + requet post api */
-/* ajouter condition si panier == vide alors ne pas afficher le formulaire */
-// if (cart === null || cart == 0) {
-//     // cacher le formulaire 
-//     // document.querySelector(".cart__order").style.display = "none";
-// } else {
-    // récup le bouton commander pour écouter le click
-    let orderBtn = document.querySelector('#order');
-    // event listerner : au click si vérif ok alors envoyer contact + products à api (post)
-    orderBtn.addEventListener('click', (e) => {
-        e.preventDefault();
+// récup le bouton commander pour écouter le click
+let orderBtn = document.querySelector('#order');
+// event listerner : au click si vérif ok alors envoyer contact + products à api (post)
+orderBtn.addEventListener('click', (e) => {
+    e.preventDefault();
 
-        let contact = {};
-        let products = [];
+    let contact = {};
+    let products = [];
 
-        //collecter les id des produits du panier
-        cart.forEach(element => {
-            products.push(element.ref);
-        })
+    //collecter les id des produits du panier
+    cart.forEach(element => {
+        products.push(element.ref);
+    })
 
-        //vérification des données du formulaire 
-        let firstName = document.querySelector('#firstName');
-        let lastName = document.querySelector('#lastName');
-        let address = document.querySelector('#address');
-        let city = document.querySelector('#city');
-        let email = document.querySelector('#email');
-        // prénom
-        if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
-            let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
-            firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> pour valider votre commande."
-            console.log("dans if prénom, car " + firstName.value + " ne correspond pas au modèle");
+    //vérification des données du formulaire 
+    let firstName = document.querySelector('#firstName');
+    let lastName = document.querySelector('#lastName');
+    let address = document.querySelector('#address');
+    let city = document.querySelector('#city');
+    let email = document.querySelector('#email');
+    // prénom
+    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
+        let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
+        firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> en lettres pour valider votre commande."
+        console.log(firstName.value + " ne correspond pas au modèle");
+        alert("Le format du prénom saisi n'est pas valide");
+    }
+    // nom         
+    else if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(lastName.value)) {
+        let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
+        lastNameErrorMsg.innerHTML = "Renseignez votre <b>nom</b> en lettres pour valider votre commande."
+        console.log("nom ne correspond pas au modèle");
+        alert("Le format du nom saisi n'est pas valide");
+    }
+    // adresse
+    else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {
+        let addressErrorMsg = document.querySelector('#addressErrorMsg');
+        addressErrorMsg.innerHTML = "Renseignez votre <b>addresse</b> pour valider votre commande. Ex : 25 rue du confort"
+        console.log("adresse ne correspond pas au modèle");
+        alert("Le format de l'adresse saisie n'est pas valide");
+    }
+    // ville
+    else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
+        let cityErrorMsg = document.querySelector('#cityErrorMsg');
+        cityErrorMsg.innerHTML = "Renseignez votre <b>ville</b> en toutes lettres pour valider votre commande."
+        console.log("ville est ne correspond pas au modèle");
+        alert("Le format de la ville saisie n'est pas valide");
+    }
+    // email
+    else if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value)) {
+        let emailErrorMsg = document.querySelector('#emailErrorMsg');
+        emailErrorMsg.innerHTML = "Renseignez votre <b>email</b> sous le format \"xxxxx@xxxx.xxx\" pour valider votre commande."
+        console.log("dans if email, car email correspond pas au regex");
+        alert("Le format de l'email saisi n'est pas valide");
+    } else {
+        // récup valeurs pour objet contact 
+        contact = {
+            'firstName': firstName.value,
+            'lastName': lastName.value,
+            'address': address.value,
+            'city': city.value,
+            'email': email.value,
         }
-        // nom
-        else if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(lastName.value)) {
-            let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
-            lastNameErrorMsg.innerHTML = "Renseignez votre nom pour valider votre commande."
-            console.log("dans if nom, car nom ne correspond pas au modèle");
-        }
-        // adresse
-        else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {
-            let addressErrorMsg = document.querySelector('#addressErrorMsg');
-            addressErrorMsg.innerHTML = "Renseignez votre address pour valider votre commande."
-            console.log("dans if adresse, car adresse ne correspond pas au modèle");
-        }
-        // ville
-        else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
-            let cityErrorMsg = document.querySelector('#cityErrorMsg');
-            cityErrorMsg.innerHTML = "Renseignez votre ville pour valider votre commande."
-            console.log("dans if ville, car ville est ne correspond pas au modèle");
-        }
-        // email
-        else if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value)) {
-            let emailErrorMsg = document.querySelector('#emailErrorMsg');
-            emailErrorMsg.innerHTML = "Renseignezvotre email pour valider votre commande."
-            console.log("dans if email, car email correspond pas au regex");
-        } else {
-            // récup valeurs et créer un objet contact 
-            contact = {
-                'firstName': firstName.value,
-                'lastName': lastName.value,
-                'address': address.value,
-                'city': city.value,
-                'email': email.value,
-            }
-            // console.log('contact')
-            // console.log(contact)
-            
-            // console.log('le tableau des id des produits :' + products);
-        // console.log('les données contact sont : ');
-        // console.log(contact);
+        // console.log('le tableau des id des produits :' + products);
+        // déclaration d'une variable contenant les infos de la commande
         let order = {
             contact,
             products
@@ -279,17 +274,17 @@ function totalPce() {
                 }
             })
             .then(function (value) {
-                localStorage.setItem('order', JSON.stringify(value));
-                //redirection vers page confirmation + 
-                window.location.href = "confirmation.html"    
+                let orderLink = document.createElement('a');
+                orderLink.href = "confirmation.html?id=" + value.orderId;
+                console.log(orderLink);
+                //redirection vers page confirmation + orderId
+                window.location.href = orderLink
             })
             .catch(err => {
                 console.error(err);
             });
-        }
-        //avec requete post hors else : requete envoyée meme si contact = vide
-    }); // fin eventListener
-// }
+    }
+}); // fin eventListener
 
 
 

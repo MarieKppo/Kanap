@@ -52,52 +52,54 @@ addToCartBtn.onclick = () => {
   let quantity = Number(document.querySelector("input").value);
   console.log("couleur et quantité sélectionnées : " + selectedColor + " " + quantity);
 
-  if ((selectedColor == "") || ((quantity == null) || (quantity < 1) || (quantity > 100))){
+  if ((selectedColor == "") || ((quantity == null) || (quantity < 1) || (quantity > 100))) {
     alert("Veuillez sélectionner une des couleurs proposées pour ce modèle et une quantité en utilisant un nombre compris entre 1 et 100 svp.");
-  }
-
-  else { //alors ajouter au localStorage, ajouter aux articles déjà stockés s'il y en a. 
-
-    //objet article ajouté au panier
-    // let AddProduct = {
-    //   "ref": idKanap,
-    //   "color": selectedColor,
-    //   "quantity": quantity,
-    // };
-
+  } else { //alors ajouter au localStorage, ajouter aux articles déjà stockés s'il y en a. 
     let cartStorage = localStorage.getItem("cart");
 
     if (cartStorage === null) {
       // console.log('le panier était vide, je le déclare');
       let cart = [];
-      cart.push({"ref": idKanap, "color" : selectedColor, "quantity": quantity});
+      cart.push({
+        "ref": idKanap,
+        "color": selectedColor,
+        "quantity": quantity
+      });
       localStorage.setItem("cart", JSON.stringify(cart));
-    } 
-    else { // puisque cart != "" alors ajouter un article ou incrémenter la quantité de ce dernier dans le panier
+    } else { // puisque cart != "" alors ajouter un article ou incrémenter la quantité de ce dernier dans le panier
       let cart = JSON.parse(cartStorage);
       // console.log(cart);
-      
+
       let newCart = [];
-      let validator = false; 
+      let validator = false;
       cart.forEach((product) => { // si produit existe déjà dans le panier augmenter qté sinon créer produti dans panier
         // console.log(product);
-        if ((product.ref == idKanap) && (product.color == selectedColor)){ // vérifie existance du produit dans panier
+        if ((product.ref == idKanap) && (product.color == selectedColor)) { // vérifie existance du produit dans panier
           product.quantity += quantity;
-          newCart.push({"ref": product.ref, "color" : product.color, "quantity": product.quantity})
-          validator = true;
-        }
-        else {
-          newCart.push({"ref": product.ref, "color" : product.color, "quantity": product.quantity})
+          newCart.push({
+            "ref": product.ref,
+            "color": product.color,
+            "quantity": product.quantity
+          })
+          validator = true; // produit existait déjà : sa qté a été incrémentée du nouvel ajout
+        } else {
+          newCart.push({
+            "ref": product.ref,
+            "color": product.color,
+            "quantity": product.quantity
+          })
         }
       });
 
-      if (!validator){
-         newCart.push({"ref": idKanap, "color" : selectedColor, "quantity": quantity});
+      if (!validator) { //  
+        newCart.push({
+          "ref": idKanap,
+          "color": selectedColor,
+          "quantity": quantity
+        });
       }
 
-      localStorage.removeItem("cart");
       localStorage.setItem("cart", JSON.stringify(newCart));
-      
     };
   }
 }
