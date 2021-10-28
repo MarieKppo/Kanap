@@ -43,7 +43,9 @@ let products = fetch("http://localhost:3000/api/products")
       });
   })
   .catch(function(err) {
-      //alert("nous n'avons pas pu charger les canapés, ils sont trop lourds."); POURQUOI S'AFFICHE T ELLE ALORS QUE LE CONTENU AUSSI ??
+    let serverErr = document.querySelector(".items");//ajouter style texte rouge
+    serverErr.innerHTML = "<div>Absence de connexion au serveur, nous ne pouvons pas afficher les articles.</div>";
+    // alert("nous n'avons pas pu charger les canapés, ils sont trop lourds."); //POURQUOI S'AFFICHE T ELLE ALORS QUE LE CONTENU AUSSI ??
     // Une erreur est survenue
   });
 
