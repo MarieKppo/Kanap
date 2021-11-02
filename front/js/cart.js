@@ -142,17 +142,6 @@ function deleteProduct() {
     }
 }
 
-/* fonction pour calculer le nombre d'articles dans le panier
-// function totalInCart() {
-//     //logique : pour chaque élément du panier, ajouter sa quantité à la variable totalQuantity
-//     let totalQty = Number(0);
-//     cart.forEach(element => {
-//         totalQty += Number(element.quantity);
-//     });
-//     document.querySelector('#totalQuantity').innerText = totalQty;
-* }
-*/
-
 /* fonction pour calculer le montant et la qté total du panier 
  * 1 = calculer le prix d'un article * sa quantité
  * 1bis = calculer le nombre d'article total dans le panier
@@ -167,10 +156,10 @@ function totalPce() {
     elements.forEach(element => {
         let dataAttribute = element.getAttribute('data-id');
         let productQty = element.querySelector(".itemQuantity").value;
-
+        //total de produit dans le panier :
         totalQty += Number(productQty);
         document.querySelector('#totalQuantity').innerText = totalQty;
-
+        // prix total du panier
         fetch("http://localhost:3000/api/products/" + dataAttribute)
             .then(function (res) {
                 if (res.ok) {
@@ -189,9 +178,80 @@ function totalPce() {
 }
 
 /******************************* vérifier les infos dans le formulaire de commande + requet post api */
+//récupération des données du formulaire 
+let form = document.querySelector('.cart__order__form');
+let firstName = document.querySelector('#firstName');
+let lastName = document.querySelector('#lastName');
+let address = document.querySelector('#address');
+let city = document.querySelector('#city');
+let email = document.querySelector('#email');
+
+// fonction pour vérifier les données du formulaire
+// prénom 
+const firstNameCheck = () => {
+    let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
+    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value) || firstName.value == "") {
+        firstNameErrorMsg.textContent = "Renseignez votre prénom en lettres pour valider votre commande."
+        console.log("le prénom : " + firstName.value + " ne correspond pas au modèle");
+        console.log("KO")
+        return false;
+    } else {
+        firstNameErrorMsg.textContent = ""
+        console.log("OK")
+        return true;
+    }
+};
+// nom
+const lastNameCheck = () => {
+    let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
+    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(lastName.value) || lastName.value == "") {
+        lastNameErrorMsg.textContent = "Renseignez votre nom en lettres pour valider votre commande."
+        console.log("le nom : " + lastName.value + " ne correspond pas au modèle");
+        return false;
+    } else {
+        lastNameErrorMsg.textContent = ""
+        return true;
+    }
+};
+// adresse
+const addressCheck = () => {
+    let addressErrorMsg = document.querySelector('#addressErrorMsg');
+    if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value) || address.value == "") {
+        addressErrorMsg.textContent = "Renseignez votre addresse pour valider votre commande. Ex : 25 rue du confort"
+        console.log("l\'adresse ne correspond pas au modèle");
+        return false;
+    } else {
+        addressErrorMsg.textContent = "";
+        return true;
+    }
+};
+// ville
+const cityCheck = () => {
+    let cityErrorMsg = document.querySelector('#cityErrorMsg');
+    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value) || city.value == "") { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
+        cityErrorMsg.textContent = "Renseignez votre ville en toutes lettres pour valider votre commande."
+        console.log("le nom de la ville ne correspond pas au modèle");
+        return false;
+    } else {
+        cityErrorMsg.textContent = "";
+        return true;
+    }
+};
+// email
+const emailCheck = () => {
+    let emailErrorMsg = document.querySelector('#emailErrorMsg');
+    if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value) || email.value == "") {
+        emailErrorMsg.textContent = "Renseignez votre email sous le format \"xxxxx@xxxx.xxx\" pour valider votre commande."
+        console.log("l\'adresse email ne correspond pas au regex");
+        return false;
+    } else {
+        emailErrorMsg.textContent = "";
+        return true;
+    }
+}
 // récup le bouton commander pour écouter le click
 let orderBtn = document.querySelector('#order');
-// event listerner : au click si vérif ok alors envoyer contact + products à api (post)
+// event listerner : au click si fonction vérifs ok alors envoyer contact + products à api (post)
 orderBtn.addEventListener('click', (e) => {
     e.preventDefault();
 
@@ -203,47 +263,12 @@ orderBtn.addEventListener('click', (e) => {
         products.push(element.ref);
     })
 
-    //vérification des données du formulaire 
-    let firstName = document.querySelector('#firstName');
-    let lastName = document.querySelector('#lastName');
-    let address = document.querySelector('#address');
-    let city = document.querySelector('#city');
-    let email = document.querySelector('#email');
-    // prénom
-    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
-        let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
-        firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> en lettres pour valider votre commande."
-        console.log(firstName.value + " ne correspond pas au modèle");
-        alert("Le format du prénom saisi n'est pas valide");
-    }
-    // nom         
-    else if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(lastName.value)) {
-        let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
-        lastNameErrorMsg.innerHTML = "Renseignez votre <b>nom</b> en lettres pour valider votre commande."
-        console.log("nom ne correspond pas au modèle");
-        alert("Le format du nom saisi n'est pas valide");
-    }
-    // adresse
-    else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {
-        let addressErrorMsg = document.querySelector('#addressErrorMsg');
-        addressErrorMsg.innerHTML = "Renseignez votre <b>addresse</b> pour valider votre commande. Ex : 25 rue du confort"
-        console.log("adresse ne correspond pas au modèle");
-        alert("Le format de l'adresse saisie n'est pas valide");
-    }
-    // ville
-    else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
-        let cityErrorMsg = document.querySelector('#cityErrorMsg');
-        cityErrorMsg.innerHTML = "Renseignez votre <b>ville</b> en toutes lettres pour valider votre commande."
-        console.log("ville est ne correspond pas au modèle");
-        alert("Le format de la ville saisie n'est pas valide");
-    }
-    // email
-    else if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value)) {
-        let emailErrorMsg = document.querySelector('#emailErrorMsg');
-        emailErrorMsg.innerHTML = "Renseignez votre <b>email</b> sous le format \"xxxxx@xxxx.xxx\" pour valider votre commande."
-        console.log("dans if email, car email correspond pas au regex");
-        alert("Le format de l'email saisi n'est pas valide");
+    // vérification des inputs du formulaire
+    if (!firstNameCheck() || !lastNameCheck() || !addressCheck() || !cityCheck() || !emailCheck()) {
+        e.preventDefault();
+        console.log("Veuillez suivre les instructions pour remplir le formulaire correctement.")
     } else {
+        console.log("le formulaire est bien rempli")
         // récup valeurs pour objet contact 
         contact = {
             'firstName': firstName.value,
@@ -252,7 +277,6 @@ orderBtn.addEventListener('click', (e) => {
             'city': city.value,
             'email': email.value,
         }
-        // console.log('le tableau des id des produits :' + products);
         // déclaration d'une variable contenant les infos de la commande
         let order = {
             contact,
@@ -285,76 +309,3 @@ orderBtn.addEventListener('click', (e) => {
             });
     }
 }); // fin eventListener
-
-
-
-//trash saved au cas ou
-/* fonction pour collecter tous les id des produits dans le panier
-// function allProductsId() {
-//     let arrayProductsId = [];
-//     cart.forEach(element => {
-//         arrayProductsId.push(element.ref);
-//     // })
-//     // console.log('le tableau des id des produits :')
-//     // console.log(arrayProductsId);
-//     return arrayProductsId;
-//     })
-// }
-*/
-/* contrôle que les infos saisies dans le formulaire correspondent aux types de données attendues + requete post api : 
- * logique : si prénom != regex lettres alors afficher span "veuillez renseigner votre prénom" etc
- * si mail != regex mail ...
- * si cp != regex cp ...
- * else récup les données dans l'objet contact et les envoyer pour générer id commande
-
-function validateForm() {
-    let firstName   = document.querySelector('#firstName');
-    let lastName    = document.querySelector('#lastName');
-    let address     = document.querySelector('#address');
-    let city        = document.querySelector('#city');
-    let email       = document.querySelector('#email'); 
-    // prénom
-    if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value)) {
-        let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
-        firstNameErrorMsg.innerHTML = "Renseignez votre <b>prénom</b> pour valider votre commande."
-        console.log("dans if prénom, car " + firstName.value + " ne correspond pas au modèle");
-    }
-    // nom
-    else if (!/^[A-Za-zÀ-ÿ\-']+$/gi.test(lastName.value)) {
-        let lastNameErrorMsg = document.querySelector('#lastNameErrorMsg');
-        lastNameErrorMsg.innerHTML = "Renseignez votre nom pour valider votre commande."
-        console.log("dans if nom, car nom ne correspond pas au modèle");
-    }
-    // adresse
-    else if (!/^([A-Za-zÀ-ÿ]|[0-9]{1,4})([A-Za-zÀ-ÿ\-' ]+$)/gi.test(address.value)) {    
-        let addressErrorMsg = document.querySelector('#addressErrorMsg');
-        addressErrorMsg.innerHTML = "Renseignez votre address pour valider votre commande."
-        console.log("dans if adresse, car adresse ne correspond pas au modèle");
-    }
-    // ville
-    else if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(city.value)) { // ou cp + ville : /^[0-9]{5} [A-Za-zÀ-ÿ\-' ]+$/gi
-        let cityErrorMsg = document.querySelector('#cityErrorMsg');
-        cityErrorMsg.innerHTML = "Renseignez votre ville pour valider votre commande."
-        console.log("dans if ville, car ville est ne correspond pas au modèle");
-    }
-    // email
-    else if (!/([a-z\.\-]{1,})@([a-z\-\.]{2,})\.([a-z]{2,4})/gi.test(email.value)) {
-        let emailErrorMsg = document.querySelector('#emailErrorMsg');
-        emailErrorMsg.innerHTML = "Renseignezvotre email pour valider votre commande."
-        console.log("dans if email, car email correspond pas au regex");
-    } 
-    else {
-        // récup valeurs et créer un objet contact 
-        // insérer la fonction qui permet d'envoyer les infos de contact à l'api + tester api avant envoie !!!
-        let contact = {
-            'firstName' : firstName.value,
-            'lastName'  : lastName.value,
-            'address'   : address.value, 
-            'city'      : city.value, 
-            'email'     : email.value,
-        }
-        // console.log("afficher le contact dans else");
-        // console.log(contact);         
-    }
-}
-*/
