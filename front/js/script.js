@@ -1,4 +1,4 @@
-//requête service web - accéder à l'api
+//requête service web pour accéder à l'api
 let products = fetch("http://localhost:3000/api/products")
   .then(function(res) {
     if (res.ok) {
@@ -8,7 +8,7 @@ let products = fetch("http://localhost:3000/api/products")
   .then(function(value) {
     //variable récup la section items dans laquelle vont apparaître les articles
     let items = document.querySelector("#items");
-    //boucle
+    //boucle sur chaque produit dans le service web
       value.forEach(element => {
         console.log(element);
         //création du lien vers page produit
@@ -48,4 +48,3 @@ let products = fetch("http://localhost:3000/api/products")
     serverErr.innerHTML = "<div>Absence de connexion au serveur, nous ne pouvons pas afficher les articles.</div>";
     // alert("nous n'avons pas pu charger les canapés, ils sont trop lourds."); 
   });
-

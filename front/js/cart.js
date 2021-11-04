@@ -110,11 +110,18 @@ function changePdtQty() { //chercher autres techniques pour retirer l'event list
         // console.log(itemQuantity[k].value);
         itemQuantity[k].addEventListener('change', () => { //callback        
             // console.log('index produit ' + k + ' valeur initiale ds la localStorage : ' + cart[k].quantity + ' nouvelle valeur : ' + itemQuantity[k].value);
-            cart[k].quantity = itemQuantity[k].value;
-            localStorage.setItem('cart', JSON.stringify(cart));
-            // totalInCart();
-            // ajouter fonction prix total pour recalcul à chaque retrait d'article
-            totalPce();
+            let newQty = itemQuantity[k].value;
+            if (newQty >= 1 && newQty <= 100){
+                cart[k].quantity = itemQuantity[k].value;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                // recalcul qté et prix totaux
+                totalPce();
+            } else {
+                alert('Veuillez saisir une valeur entre 1 et 100 s\'il vous plait.') 
+                // console.log('nvelle qté ' + newQty);
+                // console.log('qté initiale ' + cart[k].quantity);
+                itemQuantity[k].value = cart[k].quantity;               
+            }
         })
     }
 }

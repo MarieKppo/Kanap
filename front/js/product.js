@@ -44,8 +44,8 @@ fetch("http://localhost:3000/api/products/" + idKanap)
     console.log('Il y a eu un problème avec l\'opération fetch: ' + error.message);
   });
 
-// fonction ajouter au panier
 let addToCartBtn = document.querySelector('#addToCart');
+// fonction ajouter au panier
 addToCartBtn.onclick = () => {
 
   let selectedColor = document.querySelector("#colors").value;
@@ -72,9 +72,10 @@ addToCartBtn.onclick = () => {
 
       let newCart = [];
       let validator = false;
-      cart.forEach((product) => { // si produit existe déjà dans le panier augmenter qté sinon créer produti dans panier
+      cart.forEach((product) => { 
         // console.log(product);
-        if ((product.ref == idKanap) && (product.color == selectedColor)) { // vérifie existance du produit dans panier
+        // si produit existe déjà dans le panier augmenter qté 
+        if ((product.ref == idKanap) && (product.color == selectedColor)) {
           product.quantity += quantity;
           newCart.push({
             "ref": product.ref,
@@ -82,7 +83,7 @@ addToCartBtn.onclick = () => {
             "quantity": product.quantity
           })
           validator = true; // produit existait déjà : sa qté a été incrémentée du nouvel ajout
-        } else {
+        } else { // sinon créer produit dans panier
           newCart.push({
             "ref": product.ref,
             "color": product.color,
@@ -98,7 +99,7 @@ addToCartBtn.onclick = () => {
           "quantity": quantity
         });
       }
-
+      // remplace le panier par le nouveau panier avec produits ajoutés et/ou incrémentés
       localStorage.setItem("cart", JSON.stringify(newCart));
     };
   }
