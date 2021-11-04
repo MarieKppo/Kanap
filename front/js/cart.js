@@ -118,8 +118,6 @@ function changePdtQty() { //chercher autres techniques pour retirer l'event list
                 totalPce();
             } else {
                 alert('Veuillez saisir une valeur entre 1 et 100 s\'il vous plait.') 
-                // console.log('nvelle qté ' + newQty);
-                // console.log('qté initiale ' + cart[k].quantity);
                 itemQuantity[k].value = cart[k].quantity;               
             }
         })
@@ -181,6 +179,9 @@ function totalPce() {
                 // affichage prix total dans le panier
                 document.querySelector('#totalPrice').innerText = totalPce;
             })
+            .catch(function (error) {
+                console.log('Il y a eu un problème avec l\'opération fetch pour le calcul total : ' + error.message);
+            });
     });
 }
 
@@ -199,12 +200,10 @@ const firstNameCheck = () => {
     let firstNameErrorMsg = document.querySelector('#firstNameErrorMsg');
     if (!/^[A-Za-zÀ-ÿ\-' ]+$/gi.test(firstName.value) || firstName.value == "") {
         firstNameErrorMsg.textContent = "Renseignez votre prénom en lettres pour valider votre commande."
-        console.log("le prénom : " + firstName.value + " ne correspond pas au modèle");
-        console.log("KO")
+        // console.log("le prénom : " + firstName.value + " ne correspond pas au modèle");
         return false;
     } else {
         firstNameErrorMsg.textContent = ""
-        console.log("OK")
         return true;
     }
 };
@@ -256,24 +255,25 @@ const emailCheck = () => {
         return true;
     }
 }
-// récup le bouton commander pour écouter le click
+
+// event listerner : au click si vérifs ok alors envoyer contact + products à api (post)
 let orderBtn = document.querySelector('#order');
-// event listerner : au click si fonction vérifs ok alors envoyer contact + products à api (post)
 orderBtn.addEventListener('click', (e) => {
     e.preventDefault();
-
     let contact = {};
     let products = [];
-
     //collecter les id des produits du panier
     cart.forEach(element => {
         products.push(element.ref);
     })
-
     // vérification des inputs du formulaire
-    if (!firstNameCheck() || !lastNameCheck() || !addressCheck() || !cityCheck() || !emailCheck()) {
+    if (!firstNameCheck() || 
+        !lastNameCheck() || 
+        !addressCheck() || 
+        !cityCheck() || 
+        !emailCheck()) {
         e.preventDefault();
-        console.log("Veuillez suivre les instructions pour remplir le formulaire correctement.")
+        // alert("Veuillez suivre les instructions pour remplir le formulaire correctement.")
     } else {
         console.log("le formulaire est bien rempli")
         // récup valeurs pour objet contact 
